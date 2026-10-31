@@ -1,0 +1,11 @@
+{
+  "name": "ujam-marketplace",
+  "owner": {
+    "name": "jaemin-Yoo"
+  },
+  "metadata": {
+    "description": "UJAM 공유 플러그인 마켓플레이스",
+    "version": "0.1.0"
+  },
+  "plugins": []
+}
