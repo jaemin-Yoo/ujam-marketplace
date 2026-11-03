@@ -1,13 +1,17 @@
 ---
 name: commit
 description: 현재 Claude 대화에서 수행한 작업을 Conventional Commit 형식으로 커밋합니다. 대화 중 수행한 작업이 없으면 git 변경 사항 전체를 확인하며, 변경 사항이 여러 관심사에 걸쳐 있으면 논리적 단위로 분리하여 커밋합니다.
-allowed-tools: Bash(git add *) Bash(git commit *) Bash(git status *) Bash(git diff *) Bash(git branch --show-current)
+allowed-tools: Bash(git add *) Bash(git commit *) Bash(git status *) Bash(git diff *) Bash(git branch --show-current) Bash(git branch --format *)
 argument-hint: main
 ---
 
 ## 현재 브랜치
 
 !`git branch --show-current`
+
+## 로컬 브랜치 목록
+
+!`git branch --format="%(refname:short)"`
 
 ## 현재 git 상태
 
@@ -27,9 +31,17 @@ argument-hint: main
 
 ### 0단계: 브랜치 확인
 
-현재 브랜치가 `main` 또는 `master`인 경우, 커밋을 진행하기 전에 **반드시 사용자에게 확인**합니다. ("현재 `main` 브랜치입니다. 이대로 커밋을 진행할까요?" 등으로 질문) 사용자가 명시적으로 동의한 경우에만 다음 단계로 진행하고, 다른 브랜치를 원하면 브랜치를 전환한 뒤 진행합니다.
+위 "현재 브랜치"와 "로컬 브랜치 목록"을 기준으로 아래 규칙에 따라 판단합니다.
 
-단, 스킬 호출 시 인자(args)에 `main`이 포함된 경우(예: `/commit main`)에는 사용자가 이미 main 브랜치 커밋을 명시적으로 승인한 것으로 간주하고, 위 확인 질문 없이 바로 다음 단계로 진행합니다. (이 예외는 `master` 브랜치에는 적용되지 않으며, `master`인 경우 인자와 무관하게 항상 확인을 거칩니다.)
+**현재 브랜치가 `main`인 경우:**
+
+1. **로컬 브랜치가 `main` 하나뿐인 경우**: 확인 질문 없이 바로 다음 단계로 진행합니다.
+2. **`main` 외에 다른 로컬 브랜치가 존재하는 경우**: 커밋을 진행하기 전에 **반드시 사용자에게 확인**합니다. 이때 존재하는 다른 브랜치 이름을 함께 알려줍니다. (예: "현재 `main` 브랜치이며, 다른 브랜치(`feature/login`, `fix/typo`)가 존재합니다. 이대로 `main`에 커밋할까요?") 사용자가 명시적으로 동의한 경우에만 다음 단계로 진행하고, 다른 브랜치를 원하면 브랜치를 전환한 뒤 진행합니다.
+   - 단, 스킬 호출 시 인자(args)에 `main`이 포함된 경우(예: `/commit main`)에는 사용자가 이미 main 브랜치 커밋을 명시적으로 승인한 것으로 간주하고, 확인 질문 없이 바로 다음 단계로 진행합니다.
+
+**현재 브랜치가 `master`인 경우:** 브랜치 개수나 인자와 무관하게 항상 커밋 전에 사용자에게 확인합니다.
+
+**그 외 브랜치인 경우:** 확인 없이 바로 다음 단계로 진행합니다.
 
 ### 1단계: 작업 범위 판단
 
